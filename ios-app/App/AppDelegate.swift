@@ -17,6 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Enable IQKeyboardManager
         IQKeyboardManager.shared.isEnabled = true
         
+        // Register all services
+        ServiceLocator.shared.registerServices()
+        
+        // Initialize logger
+        Logger.shared.info("App launched")
+        
         return true
     }
 
