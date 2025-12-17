@@ -13,6 +13,7 @@ class ProfileViewController: BaseViewController {
     private let viewModel: ProfileViewModel
     weak var coordinator: ProfileCoordinator?
     private var cancellables = Set<AnyCancellable>()
+    var onDismiss: (() -> Void)?
     
     private let nameLabel = UILabel()
     private let emailLabel = UILabel()
@@ -62,6 +63,15 @@ class ProfileViewController: BaseViewController {
                 self?.emailLabel.text = text
             }
             .store(in: &cancellables)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Check if view controller is being popped (not just covered)
+        if isMovingFromParent {
+            onDismiss?()
+        }
     }
 }
 

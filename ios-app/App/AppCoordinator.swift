@@ -10,25 +10,51 @@ import UIKit
 protocol Coordinator: AnyObject {
     var childCoordinators: [Coordinator] { get set }
     var navigationController: UINavigationController { get set }
+    var parentCoordinator: Coordinator? { get set }
     
     func start()
+    func finish()
 }
 
 extension Coordinator {
     func addChildCoordinator(_ coordinator: Coordinator) {
+        coordinator.parentCoordinator = self
         childCoordinators.append(coordinator)
     }
     
     func removeChildCoordinator(_ coordinator: Coordinator) {
         childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
+    
+    func removeAllChildCoordinators() {
+        childCoordinators.removeAll()
+    }
+    
+    func childDidFinish(_ child: Coordinator?) {
+        for (index, coordinator) in childCoordinators.enumerated() {
+            if coordinator === child {
+                childCoordinators.remove(at: index)
+                break
+            }
+        }
+    }
+    
+    // Default implementation of finish
+    func finish() {
+        // Clean up all child coordinators
+        childCoordinators.forEach { $0.finish() }
+        childCoordinators.removeAll()
+        
+        // Remove self from parent
+        parentCoordinator?.removeChildCoordinator(self)
+    }
 }
 
 class AppCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
+    var parentCoordinator: Coordinator? = nil
     var window: UIWindow
-    private var homeCoordinator: HomeCoordinator? // Retain reference
     
     init(window: UIWindow) {
         self.window = window
@@ -40,13 +66,18 @@ class AppCoordinator: Coordinator {
         window.makeKeyAndVisible()
         
         // Check if user is authenticated or needs onboarding
-//        if shouldShowOnboarding() {
-//            showOnboarding()
-//        } else {
-//            showHome()
-//        }
-        
-        showHome()
+        if shouldShowOnboarding() {
+            showOnboarding()
+        } else {
+            showHome()
+        }
+    }
+    
+    func finish() {
+        // App coordinator doesn't finish - it's the root
+        // But we can clean up children if needed
+        childCoordinators.forEach { $0.finish() }
+        childCoordinators.removeAll()
     }
     
     private func shouldShowOnboarding() -> Bool {
@@ -56,16 +87,16 @@ class AppCoordinator: Coordinator {
     
     private func showOnboarding() {
         let onboardingCoordinator = OnboardingCoordinator(navigationController: navigationController)
-        onboardingCoordinator.parentCoordinator = self
         addChildCoordinator(onboardingCoordinator)
         onboardingCoordinator.start()
     }
     
-    private func showHome() {
+    func showHome() {
+        // Remove any existing coordinators
+        removeAllChildCoordinators()
+        
         let coordinator = HomeCoordinator(navigationController: navigationController)
-        coordinator.parentCoordinator = self
         addChildCoordinator(coordinator)
-        self.homeCoordinator = coordinator // Retain reference
         coordinator.start()
     }
 }

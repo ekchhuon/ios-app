@@ -12,6 +12,9 @@ class SettingsCoordinator: BaseCoordinator {
         let viewModel = SettingsViewModel()
         let viewController = SettingsViewController(viewModel: viewModel)
         viewController.coordinator = self
+        viewController.onDismiss = { [weak self] in
+            self?.parentCoordinator?.childDidFinish(self)
+        }
         navigationController.pushViewController(viewController, animated: true)
     }
 }

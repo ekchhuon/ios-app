@@ -13,6 +13,7 @@ class SettingsViewController: BaseViewController {
     private let viewModel: SettingsViewModel
     weak var coordinator: SettingsCoordinator?
     private var cancellables = Set<AnyCancellable>()
+    var onDismiss: (() -> Void)?
     
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     
@@ -47,6 +48,15 @@ class SettingsViewController: BaseViewController {
                 self?.tableView.reloadData()
             }
             .store(in: &cancellables)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Check if view controller is being popped (not just covered)
+        if isMovingFromParent {
+            onDismiss?()
+        }
     }
 }
 

@@ -25,14 +25,12 @@ class HomeCoordinator: BaseCoordinator {
     
     func showProfile() {
         let profileCoordinator = ProfileCoordinator(navigationController: navigationController)
-        profileCoordinator.parentCoordinator = self
         addChildCoordinator(profileCoordinator)
         profileCoordinator.start()
     }
     
     func showSettings() {
         let settingsCoordinator = SettingsCoordinator(navigationController: navigationController)
-        settingsCoordinator.parentCoordinator = self
         addChildCoordinator(settingsCoordinator)
         settingsCoordinator.start()
     }

@@ -17,12 +17,12 @@ class OnboardingCoordinator: BaseCoordinator {
     
     func finishOnboarding() {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-        // Navigate to home or login
-        let homeCoordinator = HomeCoordinator(navigationController: navigationController)
-        homeCoordinator.parentCoordinator = parentCoordinator
-        parentCoordinator?.addChildCoordinator(homeCoordinator)
-        parentCoordinator?.removeChildCoordinator(self)
-        homeCoordinator.start()
+        
+        // Notify parent coordinator to show home
+        if let appCoordinator = parentCoordinator as? AppCoordinator {
+            finish() // Clean up onboarding coordinator
+            appCoordinator.showHome()
+        }
     }
 }
 
